@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+
+const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5144/api";
 
 function GoogleIcon() {
   return (
@@ -15,14 +16,13 @@ function GoogleIcon() {
 
 export function GoogleButton({ label = "Continue with Google" }: { label?: string }) {
   const [loading, setLoading] = useState(false);
+
   const handle = () => {
     if (loading) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.error("Google sign-in is not available in demo mode");
-    }, 1500);
+    window.location.href = `${API_URL}/auth/google/login`;
   };
+
   return (
     <button
       type="button"
