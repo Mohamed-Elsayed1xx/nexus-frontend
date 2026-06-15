@@ -11,6 +11,18 @@ export const Route = createFileRoute("/login")({ component: Login });
 function Login() {
   const nav = useNavigate();
   useEffect(() => {
+    // Handle Google OAuth callback tokens in URL
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
+    if (accessToken && refreshToken) {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      window.history.replaceState({}, "", "/login");
+      nav({ to: "/dashboard" });
+      return;
+    }
+
     const s = getSession();
     if (s) nav({ to: s.role === "Admin" ? "/admin" : "/dashboard" });
   }, [nav]);
