@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { AuthSplit } from "@/components/nexus/auth-split";
 import { Field } from "./login";
 import { PasswordStrength } from "@/components/nexus/password-strength";
-import { GoogleButton, OrDivider } from "@/components/nexus/google-button";
 import { login as doLogin } from "@/lib/session-store";
 import { authApi } from "@/lib/api";
 
@@ -32,22 +31,17 @@ function Register() {
 
     setLoading(true);
     try {
-      // Step 1: سجّل الـ account
       await authApi.register({ fullName, email, password: pw });
     } catch (e: any) {
-      // ✅ FIX: لو الـ register فشل (مثلاً email موجود) نوقف هنا ونعرض السبب
       setErr(e?.response?.data?.message ?? "Registration failed. Please try again.");
       setLoading(false);
       return;
     }
 
-    // Step 2: سجّل دخول تلقائياً بعد الـ register
-    // ✅ FIX: استخدام الـ result object الجديد بدل null check
     const result = await doLogin(email, pw);
     setLoading(false);
 
     if ("error" in result) {
-      // Register نجح بس login فشل — خليه يدخل يدوي
       toast.success("Account created! Please sign in.");
       nav({ to: "/login" });
       return;
@@ -69,8 +63,6 @@ function Register() {
         <h1 className="font-display text-2xl font-bold">Create your account</h1>
         <p className="text-sm text-muted-foreground mt-1">Get started in minutes</p>
         <div className="mt-6 space-y-4">
-          <GoogleButton label="Continue with Google" />
-          <OrDivider />
           <Field icon={<User className="w-4 h-4" />}>
             <input
               value={fullName}
