@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { authApi } from "./api";
-
 export type Session = {
   id: string;
   email: string;
@@ -8,10 +7,8 @@ export type Session = {
   role: "Admin" | "User";
   avatarUrl: string | null;
 };
-
 const KEY = "nexus.session";
 const EVT = "nexus:session-changed";
-
 export function getSession(): Session | null {
   if (typeof window === "undefined") return null;
   try {
@@ -21,8 +18,6 @@ export function getSession(): Session | null {
     return null;
   }
 }
-
-// ✅ FIX: login بترجع { session } أو { error } بدل null عشان الـ UI يعرف ليه فشل
 export async function login(
   email: string,
   password: string
@@ -30,7 +25,6 @@ export async function login(
   try {
     const res = await authApi.login({ email, password });
     const { accessToken, refreshToken, user } = res.data.data;
-
     const session: Session = {
       id: user.id,
       email: user.email,
@@ -38,19 +32,14 @@ export async function login(
       role: user.role,
       avatarUrl: user.avatarUrl,
     };
-
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     localStorage.setItem(KEY, JSON.stringify(session));
     window.dispatchEvent(new CustomEvent(EVT));
-
-    // حدّث الـ profile cache مباشرةً بعد اللوجين
     const { fetchProfile } = await import("./profile-store");
     fetchProfile();
-
     return { session };
   } catch (e: any) {
-    // ✅ FIX: استخرج الرسالة الحقيقية من الـ response
     const message =
       e?.response?.data?.message ??
       e?.message ??
@@ -58,7 +47,6 @@ export async function login(
     return { error: message };
   }
 }
-
 export async function logout() {
   const refreshToken = localStorage.getItem("refreshToken");
   if (refreshToken) {
@@ -68,12 +56,10 @@ export async function logout() {
   }
   localStorage.clear();
   window.dispatchEvent(new CustomEvent(EVT));
+  window.location.href = "/login";
 }
-
 export function useSession(): Session | null {
-  // lazy init — بيقرأ الـ session من أول render مش بعده
   const [s, setS] = useState<Session | null>(() => getSession());
-
   useEffect(() => {
     const on = () => setS(getSession());
     window.addEventListener(EVT, on);
@@ -83,6 +69,5 @@ export function useSession(): Session | null {
       window.removeEventListener("storage", on);
     };
   }, []);
-
   return s;
 }
